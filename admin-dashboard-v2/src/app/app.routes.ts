@@ -7,4 +7,10 @@ export const routes: Routes = [
   },
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: '**', redirectTo: 'login' },
+  {
+  path: 'dashboard',
+  loadChildren: () =>
+    import('./features/dashboard/dashboard-module')
+      .then(m => m.DashboardModule)
+}
 ];
