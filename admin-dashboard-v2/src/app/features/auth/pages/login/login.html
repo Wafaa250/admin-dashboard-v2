@@ -1,0 +1,39 @@
+<h2>Admin Login</h2>
+
+<form [formGroup]="loginData" (ngSubmit)="onLogin()">
+
+  <div>
+    <label>Email:</label><br>
+    <input type="email" formControlName="email">
+
+    <div *ngIf="loginData.get('email')?.touched && loginData.get('email')?.invalid">
+      <small *ngIf="loginData.get('email')?.errors?.['required']">
+        Email is required
+      </small>
+      <small *ngIf="loginData.get('email')?.errors?.['email']">
+        Please enter a valid email
+      </small>
+    </div>
+  </div>
+
+  <br>
+
+  <div>
+    <label>Password:</label><br>
+    <input type="password" formControlName="password">
+
+    <div *ngIf="loginData.get('password')?.touched && loginData.get('password')?.invalid">
+      <small *ngIf="loginData.get('password')?.errors?.['required']">
+        Password is required
+      </small>
+      <small *ngIf="loginData.get('password')?.errors?.['minlength']">
+        Password must be at least 6 characters
+      </small>
+    </div>
+  </div>
+
+  <br>
+
+  <button type="submit">Login</button>
+
+</form>
