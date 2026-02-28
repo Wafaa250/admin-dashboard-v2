@@ -1,53 +1,63 @@
-# Admin Dashboard — Angular 17
+# Admin Dashboard v2
 
-داشبورد إداري لإدارة المنتجات والطلبات مبني بـ Angular 17.
-
-## تشغيل المشروع
-
-```bash
-npm install
-npm start
-```
-
-افتح المتصفح على `http://localhost:4200`
-
-**بيانات الدخول:** `admin` / `password123`
+Simple Angular 17 Admin Dashboard project.
 
 ---
 
-## هيكل المشروع
+## Final Submission
 
-```
-src/app/
-├── core/
-│   ├── guards/        # حماية الروابط
-│   ├── interceptors/  # Token + معالجة الأخطاء
-│   ├── models/        # TypeScript interfaces
-│   └── services/      # Auth, Product, Order services
-└── features/
-    ├── auth/          # صفحة تسجيل الدخول
-    ├── dashboard/     # الإحصائيات
-    ├── products/      # إدارة المنتجات
-    └── orders/        # إدارة الطلبات
-```
+This project is a simple Admin Dashboard built using Angular 17.  
+It was created as a technical assignment to practice Angular basics.
 
 ---
 
-## المتطلبات المنجزة
+## How It Works (Simple Explanation)
 
-| المتطلب | التنفيذ |
-|---|---|
-| Angular 17 + Strict Mode | `tsconfig.json` |
-| Authentication | Mock auth مع JWT token |
-| Route Guards | `authGuard` و `guestGuard` |
-| Lazy Loading | كل الـ features محمّلة بشكل lazy |
-| Products CRUD | إضافة، تعديل، حذف، بحث، ترتيب، pagination |
-| Orders | عرض وتحديث الحالة مع فلترة |
-| Dashboard Analytics | `forkJoin` لتحميل البيانات بشكل متوازي |
-| Reactive Forms | Login + Product forms |
-| Async Validator | التحقق من تكرار اسم المنتج |
-| HTTP Interceptors | Token interceptor + Error interceptor |
-| RxJS | `forkJoin`, `debounceTime`, `switchMap`, `takeUntil` |
-| OnPush | مستخدم في جميع الـ components |
-| trackBy | في كل `*ngFor` |
-| No memory leaks | `takeUntil(destroy$)` في كل مكان |
+- I created the project using Angular CLI.
+- I built separate pages like Login, Dashboard, Products, and Orders.
+- I used routing to navigate between pages.
+- I added an Auth Guard to protect routes after login.
+- I created services to manage data.
+- I used Reactive Forms for form validation.
+- I organized the project into folders (core and features) to keep it clean.
+
+This project helped me understand how Angular applications are structured and how components and services work together.
+
+---
+Open browser at `http://localhost:4200`
+## Login Credentials
+- Username: `wafaa`
+- Password: `wafaa123`
+
+## Screenshots
+
+### Login Page
+![Login](screenshots/login.png)
+
+### Dashboard
+![Dashboard](screenshots/dashboard.png)
+
+### Products
+![Products](screenshots/product.png)
+
+### order
+![Products](screenshots/order.png)
+
+### activeproduct
+![Products](screenshots/activeproduct.png)
+
+
+### inctiveproduct
+![Products](screenshots/inctiveproduct.png)
+
+
+
+### invalidlogin
+![Products](screenshots/invalidlogin.png)
+
+
+
+### search
+![Products](screenshots/search.png)
+
+
