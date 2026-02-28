@@ -47,8 +47,8 @@ Open browser at `http://localhost:4200`
 ![Products](screenshots/activeproduct.png)
 
 
-### inctiveproduct
-![Products](screenshots/inctiveproduct.png)
+### inactiveproduct
+![Products](screenshots/inactiveproduct.png)
 
 
 
