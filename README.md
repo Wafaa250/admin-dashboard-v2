@@ -1,6 +1,6 @@
 # Admin Dashboard v2
 
-Simple Angular 17 Admin Dashboard project.
+Simple Angular 21.2.0 Admin Dashboard project.
 
 ---
 
