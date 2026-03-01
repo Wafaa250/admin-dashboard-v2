@@ -10,16 +10,18 @@ import { Order, OrderFilter, OrderStatus } from '../../../core/models/order.mode
     template: `
     <div class="page">
       <h1 style="font-size:20px; font-weight:600; margin-bottom:20px;">Orders</h1>
-
+    
       <div class="card">
         <div class="toolbar">
           <input type="text" placeholder="Search..." (input)="onSearch($event)" />
           <select (change)="onStatusChange($event)">
             <option value="">All Status</option>
-            <option *ngFor="let s of statuses" [value]="s">{{ s | titlecase }}</option>
+            @for (s of statuses; track s) {
+              <option [value]="s">{{ s | titlecase }}</option>
+            }
           </select>
         </div>
-
+    
         <table>
           <thead>
             <tr>
@@ -33,34 +35,42 @@ import { Order, OrderFilter, OrderStatus } from '../../../core/models/order.mode
             </tr>
           </thead>
           <tbody>
-            <tr *ngIf="orders.length === 0">
-              <td colspan="7" style="padding:20px; color:#888;">No orders found</td>
-            </tr>
-            <tr *ngFor="let order of orders; trackBy: trackById">
-              <td>#{{ order.id }}</td>
-              <td>{{ order.customerName }}</td>
-              <td>{{ order.products.join(', ') }}</td>
-              <td>{{ order.total | currency }}</td>
-              <td>{{ order.status | titlecase }}</td>
-              <td>{{ order.createdAt }}</td>
-              <td>
-                <select [(ngModel)]="order.status" (ngModelChange)="updateStatus(order, $event)"
-                  style="padding:4px 8px; border:1px solid #ccc; border-radius:4px; font-size:13px;">
-                  <option *ngFor="let s of statuses" [value]="s">{{ s | titlecase }}</option>
-                </select>
-              </td>
-            </tr>
+            @if (orders.length === 0) {
+              <tr>
+                <td colspan="7" style="padding:20px; color:#888;">No orders found</td>
+              </tr>
+            }
+            @for (order of orders; track trackById($index, order)) {
+              <tr>
+                <td>#{{ order.id }}</td>
+                <td>{{ order.customerName }}</td>
+                <td>{{ order.products.join(', ') }}</td>
+                <td>{{ order.total | currency }}</td>
+                <td>{{ order.status | titlecase }}</td>
+                <td>{{ order.createdAt }}</td>
+                <td>
+                  <select [(ngModel)]="order.status" (ngModelChange)="updateStatus(order, $event)"
+                    style="padding:4px 8px; border:1px solid #ccc; border-radius:4px; font-size:13px;">
+                    @for (s of statuses; track s) {
+                      <option [value]="s">{{ s | titlecase }}</option>
+                    }
+                  </select>
+                </td>
+              </tr>
+            }
           </tbody>
         </table>
-
-        <div *ngIf="totalPages > 1" style="margin-top:16px; display:flex; align-items:center; gap:10px; justify-content:center;">
-          <button class="btn btn-sm" (click)="goPrev()" [disabled]="filter.page === 1">Prev</button>
-          <span style="font-size:13px; color:#555;">Page {{ filter.page }} of {{ totalPages }}</span>
-          <button class="btn btn-sm" (click)="goNext()" [disabled]="filter.page === totalPages">Next</button>
-        </div>
+    
+        @if (totalPages > 1) {
+          <div style="margin-top:16px; display:flex; align-items:center; gap:10px; justify-content:center;">
+            <button class="btn btn-sm" (click)="goPrev()" [disabled]="filter.page === 1">Prev</button>
+            <span style="font-size:13px; color:#555;">Page {{ filter.page }} of {{ totalPages }}</span>
+            <button class="btn btn-sm" (click)="goNext()" [disabled]="filter.page === totalPages">Next</button>
+          </div>
+        }
       </div>
     </div>
-  `
+    `
 })
 export class OrdersListComponent implements OnInit {
 

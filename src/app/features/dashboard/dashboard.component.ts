@@ -11,10 +11,12 @@ import { OrderService } from '../../core/services/order.service';
     template: `
     <div class="page">
       <h1 style="margin-bottom: 24px; font-size: 20px; font-weight: 600;">Overview</h1>
-
-      <div *ngIf="loading" style="padding: 40px; color: #888;">Loading...</div>
-
-      <ng-container *ngIf="!loading">
+    
+      @if (loading) {
+        <div style="padding: 40px; color: #888;">Loading...</div>
+      }
+    
+      @if (!loading) {
         <div class="stats-grid">
           <div class="stat-card">
             <h3>{{ stats.totalProducts }}</h3>
@@ -33,7 +35,6 @@ import { OrderService } from '../../core/services/order.service';
             <p>Revenue</p>
           </div>
         </div>
-
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
           <div class="card">
             <h3 style="margin-bottom: 16px; font-size: 15px;">Orders</h3>
@@ -52,7 +53,6 @@ import { OrderService } from '../../core/services/order.service';
               </tr>
             </table>
           </div>
-
           <div class="card">
             <h3 style="margin-bottom: 16px; font-size: 15px;">Inventory</h3>
             <table>
@@ -71,9 +71,9 @@ import { OrderService } from '../../core/services/order.service';
             </table>
           </div>
         </div>
-      </ng-container>
+      }
     </div>
-  `
+    `
 })
 export class DashboardComponent implements OnInit {
   loading = true;

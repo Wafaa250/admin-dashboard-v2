@@ -1,14 +1,14 @@
 import { Component } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
-import { CommonModule } from '@angular/common';
+
 import { AuthService } from './core/services/auth.service';
 import { Router } from '@angular/router';
 
 @Component({
     selector: 'app-root',
-    imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule],
+    imports: [RouterOutlet, RouterLink, RouterLinkActive],
     template: `
-    <ng-container *ngIf="auth.isLoggedIn; else noLayout">
+    @if (auth.isLoggedIn) {
       <div class="layout">
         <aside class="sidebar">
           <div class="logo">Admin</div>
@@ -29,11 +29,10 @@ import { Router } from '@angular/router';
           <router-outlet />
         </div>
       </div>
-    </ng-container>
-    <ng-template #noLayout>
+    } @else {
       <router-outlet />
-    </ng-template>
-  `
+    }
+    `
 })
 export class AppComponent {
   constructor(public auth: AuthService, private router: Router) {}

@@ -17,13 +17,15 @@ import { ProductNameValidator } from '../product-name.validator';
         <h1 style="font-size:20px; font-weight:600;">Products</h1>
         <button class="btn btn-primary" (click)="openModal()">Add Product</button>
       </div>
-
+    
       <div class="card">
         <div class="toolbar">
           <input type="text" placeholder="Search..." (input)="onSearch($event)" />
           <select (change)="onCategoryChange($event)">
             <option value="">All Categories</option>
-            <option *ngFor="let cat of categories; trackBy: trackByValue" [value]="cat">{{ cat }}</option>
+            @for (cat of categories; track trackByValue($index, cat)) {
+              <option [value]="cat">{{ cat }}</option>
+            }
           </select>
           <select (change)="onStatusChange($event)">
             <option value="">All Status</option>
@@ -31,7 +33,7 @@ import { ProductNameValidator } from '../product-name.validator';
             <option value="inactive">Inactive</option>
           </select>
         </div>
-
+    
         <div class="table-container">
           <table>
             <thead>
@@ -47,105 +49,127 @@ import { ProductNameValidator } from '../product-name.validator';
               </tr>
             </thead>
             <tbody>
-              <tr *ngIf="loading">
-                <td colspan="8" style="padding:30px; color:#888;">Loading...</td>
-              </tr>
-              <tr *ngIf="!loading && products.length === 0">
-                <td colspan="8" style="padding:30px; color:#888;">No products found</td>
-              </tr>
-              <tr *ngFor="let p of products; trackBy: trackById">
-                <td>{{ p.id }}</td>
-                <td>{{ p.name }}</td>
-                <td>{{ p.category }}</td>
-                <td>{{ p.price | currency }}</td>
-                <td>{{ p.stock }}</td>
-                <td>
-                  <span [class]="'status status-' + p.status">{{ p.status }}</span>
-                </td>
-                <td>{{ p.createdAt }}</td>
-                <td>
-                  <button class="btn btn-sm" style="margin-right:4px;" (click)="openModal(p)">Edit</button>
-                  <button class="btn btn-danger btn-sm" (click)="delete(p)">Delete</button>
-                </td>
-              </tr>
+              @if (loading) {
+                <tr>
+                  <td colspan="8" style="padding:30px; color:#888;">Loading...</td>
+                </tr>
+              }
+              @if (!loading && products.length === 0) {
+                <tr>
+                  <td colspan="8" style="padding:30px; color:#888;">No products found</td>
+                </tr>
+              }
+              @for (p of products; track trackById($index, p)) {
+                <tr>
+                  <td>{{ p.id }}</td>
+                  <td>{{ p.name }}</td>
+                  <td>{{ p.category }}</td>
+                  <td>{{ p.price | currency }}</td>
+                  <td>{{ p.stock }}</td>
+                  <td>
+                    <span [class]="'status status-' + p.status">{{ p.status }}</span>
+                  </td>
+                  <td>{{ p.createdAt }}</td>
+                  <td>
+                    <button class="btn btn-sm" style="margin-right:4px;" (click)="openModal(p)">Edit</button>
+                    <button class="btn btn-danger btn-sm" (click)="delete(p)">Delete</button>
+                  </td>
+                </tr>
+              }
             </tbody>
           </table>
         </div>
-
-        <div class="pagination" *ngIf="totalPages > 0">
-          <button (click)="goPage(filter.page - 1)" [disabled]="filter.page === 1">‹</button>
-          <button
-            *ngFor="let p of pageNumbers; trackBy: trackByValue"
-            (click)="goPage(p)"
-            [class.active]="p === filter.page"
-          >{{ p }}</button>
-          <button (click)="goPage(filter.page + 1)" [disabled]="filter.page === totalPages">›</button>
-          <span style="color:#888; font-size:13px; margin-left:6px;">Total: {{ total }}</span>
-        </div>
+    
+        @if (totalPages > 0) {
+          <div class="pagination">
+            <button (click)="goPage(filter.page - 1)" [disabled]="filter.page === 1">‹</button>
+            @for (p of pageNumbers; track trackByValue($index, p)) {
+              <button
+                (click)="goPage(p)"
+                [class.active]="p === filter.page"
+              >{{ p }}</button>
+            }
+            <button (click)="goPage(filter.page + 1)" [disabled]="filter.page === totalPages">›</button>
+            <span style="color:#888; font-size:13px; margin-left:6px;">Total: {{ total }}</span>
+          </div>
+        }
       </div>
     </div>
-
+    
     <!-- Modal -->
-    <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
-      <div class="modal" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-          <h3>{{ editingProduct ? 'Edit Product' : 'Add Product' }}</h3>
-          <button (click)="closeModal()">×</button>
+    @if (showModal) {
+      <div class="modal-overlay" (click)="closeModal()">
+        <div class="modal" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <h3>{{ editingProduct ? 'Edit Product' : 'Add Product' }}</h3>
+            <button (click)="closeModal()">×</button>
+          </div>
+          <form [formGroup]="productForm" (ngSubmit)="saveProduct()">
+            <div class="form-group">
+              <label>Name</label>
+              <input formControlName="name" [class.invalid]="isInvalid('name')" />
+              @if (isInvalid('name')) {
+                <div class="error-msg">
+                  @if (productForm.get('name')?.errors?.['required']) {
+                    <span>Required</span>
+                  }
+                  @if (productForm.get('name')?.errors?.['nameTaken']) {
+                    <span>Name already exists</span>
+                  }
+                </div>
+              }
+              @if (productForm.get('name')?.pending) {
+                <div style="font-size:12px; color:#888; margin-top:3px;">
+                  Checking...
+                </div>
+              }
+            </div>
+            <div class="form-group">
+              <label>Category</label>
+              <select formControlName="category" [class.invalid]="isInvalid('category')">
+                <option value="">Select</option>
+                @for (cat of categories; track trackByValue($index, cat)) {
+                  <option [value]="cat">{{ cat }}</option>
+                }
+              </select>
+              @if (isInvalid('category')) {
+                <div class="error-msg">Required</div>
+              }
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+              <div class="form-group">
+                <label>Price</label>
+                <input type="number" formControlName="price" [class.invalid]="isInvalid('price')" />
+                @if (isInvalid('price')) {
+                  <div class="error-msg">Required, must be > 0</div>
+                }
+              </div>
+              <div class="form-group">
+                <label>Stock</label>
+                <input type="number" formControlName="stock" [class.invalid]="isInvalid('stock')" />
+                @if (isInvalid('stock')) {
+                  <div class="error-msg">Required, must be >= 0</div>
+                }
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Status</label>
+              <select formControlName="status">
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn" (click)="closeModal()">Cancel</button>
+              <button type="submit" class="btn btn-primary" [disabled]="productForm.invalid || productForm.pending || saving">
+                {{ saving ? 'Saving...' : (editingProduct ? 'Update' : 'Create') }}
+              </button>
+            </div>
+          </form>
         </div>
-
-        <form [formGroup]="productForm" (ngSubmit)="saveProduct()">
-          <div class="form-group">
-            <label>Name</label>
-            <input formControlName="name" [class.invalid]="isInvalid('name')" />
-            <div class="error-msg" *ngIf="isInvalid('name')">
-              <span *ngIf="productForm.get('name')?.errors?.['required']">Required</span>
-              <span *ngIf="productForm.get('name')?.errors?.['nameTaken']">Name already exists</span>
-            </div>
-            <div style="font-size:12px; color:#888; margin-top:3px;" *ngIf="productForm.get('name')?.pending">
-              Checking...
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label>Category</label>
-            <select formControlName="category" [class.invalid]="isInvalid('category')">
-              <option value="">Select</option>
-              <option *ngFor="let cat of categories; trackBy: trackByValue" [value]="cat">{{ cat }}</option>
-            </select>
-            <div class="error-msg" *ngIf="isInvalid('category')">Required</div>
-          </div>
-
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-            <div class="form-group">
-              <label>Price</label>
-              <input type="number" formControlName="price" [class.invalid]="isInvalid('price')" />
-              <div class="error-msg" *ngIf="isInvalid('price')">Required, must be > 0</div>
-            </div>
-            <div class="form-group">
-              <label>Stock</label>
-              <input type="number" formControlName="stock" [class.invalid]="isInvalid('stock')" />
-              <div class="error-msg" *ngIf="isInvalid('stock')">Required, must be >= 0</div>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label>Status</label>
-            <select formControlName="status">
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-            </select>
-          </div>
-
-          <div class="modal-footer">
-            <button type="button" class="btn" (click)="closeModal()">Cancel</button>
-            <button type="submit" class="btn btn-primary" [disabled]="productForm.invalid || productForm.pending || saving">
-              {{ saving ? 'Saving...' : (editingProduct ? 'Update' : 'Create') }}
-            </button>
-          </div>
-        </form>
       </div>
-    </div>
-  `
+    }
+    `
 })
 export class ProductsListComponent implements OnInit, OnDestroy {
   products: Product[] = [];

@@ -1,21 +1,23 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
     selector: 'app-login',
-    imports: [CommonModule, ReactiveFormsModule],
+    imports: [ReactiveFormsModule],
     template: `
     <div class="auth-page">
       <div class="auth-card">
         <div class="auth-logo">
           <h1>Admin Dashboard</h1>
         </div>
-
-        <div class="error-alert" *ngIf="errorMsg">{{ errorMsg }}</div>
-
+    
+        @if (errorMsg) {
+          <div class="error-alert">{{ errorMsg }}</div>
+        }
+    
         <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
           <div class="form-group">
             <label>Username</label>
@@ -23,32 +25,36 @@ import { AuthService } from '../../../core/services/auth.service';
               type="text"
               formControlName="username"
               [class.invalid]="isInvalid('username')"
-            />
-            <div class="error-msg" *ngIf="isInvalid('username')">Required</div>
+              />
+            @if (isInvalid('username')) {
+              <div class="error-msg">Required</div>
+            }
           </div>
-
+    
           <div class="form-group">
             <label>Password</label>
             <input
               type="password"
               formControlName="password"
               [class.invalid]="isInvalid('password')"
-            />
-            <div class="error-msg" *ngIf="isInvalid('password')">Required</div>
+              />
+            @if (isInvalid('password')) {
+              <div class="error-msg">Required</div>
+            }
           </div>
-
+    
           <button
             type="submit"
             class="btn btn-primary"
             style="width:100%; padding: 10px; font-size: 15px; margin-top: 8px;"
             [disabled]="loading"
-          >
+            >
             {{ loading ? 'Logging in...' : 'Login' }}
           </button>
         </form>
       </div>
     </div>
-  `
+    `
 })
 export class LoginComponent {
   loginForm: FormGroup;
