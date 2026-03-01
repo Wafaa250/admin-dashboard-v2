@@ -5,10 +5,9 @@ import { OrderService } from '../../../core/services/order.service';
 import { Order, OrderFilter, OrderStatus } from '../../../core/models/order.model';
 
 @Component({
-  selector: 'app-orders-list',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
-  template: `
+    selector: 'app-orders-list',
+    imports: [CommonModule, FormsModule],
+    template: `
     <div class="page">
       <h1 style="font-size:20px; font-weight:600; margin-bottom:20px;">Orders</h1>
 

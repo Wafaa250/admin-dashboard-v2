@@ -5,11 +5,10 @@ import { ProductService } from '../../core/services/product.service';
 import { OrderService } from '../../core/services/order.service';
 
 @Component({
-  selector: 'app-dashboard',
-  standalone: true,
-  imports: [CommonModule],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
+    selector: 'app-dashboard',
+    imports: [CommonModule],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    template: `
     <div class="page">
       <h1 style="margin-bottom: 24px; font-size: 20px; font-weight: 600;">Overview</h1>
 

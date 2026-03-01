@@ -5,10 +5,9 @@ import { AuthService } from './core/services/auth.service';
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-root',
-  standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule],
-  template: `
+    selector: 'app-root',
+    imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule],
+    template: `
     <ng-container *ngIf="auth.isLoggedIn; else noLayout">
       <div class="layout">
         <aside class="sidebar">

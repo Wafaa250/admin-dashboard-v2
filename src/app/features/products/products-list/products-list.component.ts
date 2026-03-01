@@ -8,11 +8,10 @@ import { Product, ProductFilter } from '../../../core/models/product.model';
 import { ProductNameValidator } from '../product-name.validator';
 
 @Component({
-  selector: 'app-products-list',
-  standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
+    selector: 'app-products-list',
+    imports: [CommonModule, ReactiveFormsModule],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    template: `
     <div class="page">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
         <h1 style="font-size:20px; font-weight:600;">Products</h1>
