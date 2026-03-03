@@ -16,6 +16,9 @@
     "@angular/platform-browser": "^21.2.0",
     "@angular/platform-browser-dynamic": "^21.2.0",
     "@angular/router": "^21.2.0",
+    "ag-charts-angular": "^13.1.0",
+    "ag-charts-community": "^13.1.0",
+    "chart.js": "^4.5.1",
     "rxjs": "~7.8.0",
     "tslib": "^2.6.0",
     "zone.js": "~0.15.1"

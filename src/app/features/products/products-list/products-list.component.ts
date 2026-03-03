@@ -3,21 +3,30 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
+import { AgCharts } from 'ag-charts-angular';
+import { AgChartOptions } from 'ag-charts-community';
 import { ProductService } from '../../../core/services/product.service';
 import { Product, ProductFilter } from '../../../core/models/product.model';
 import { ProductNameValidator } from '../product-name.validator';
 
 @Component({
     selector: 'app-products-list',
-    imports: [CommonModule, ReactiveFormsModule],
-    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [CommonModule, ReactiveFormsModule, AgCharts],
     template: `
     <div class="page">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
         <h1 style="font-size:20px; font-weight:600;">Products</h1>
         <button class="btn btn-primary" (click)="openModal()">Add Product</button>
       </div>
-    
+
+      <!-- Pie Chart -->
+      <div class="card" style="margin-bottom:16px;">
+        <h3 style="margin-bottom:12px;">Product Status</h3>
+        <div style="height:250px;">
+          <ag-charts [options]="chartOptions" style="display:block; width:100%; height:100%;"></ag-charts>
+        </div>
+      </div>
+
       <div class="card">
         <div class="toolbar">
           <input type="text" placeholder="Search..." (input)="onSearch($event)" />
@@ -33,7 +42,7 @@ import { ProductNameValidator } from '../product-name.validator';
             <option value="inactive">Inactive</option>
           </select>
         </div>
-    
+
         <div class="table-container">
           <table>
             <thead>
@@ -50,14 +59,10 @@ import { ProductNameValidator } from '../product-name.validator';
             </thead>
             <tbody>
               @if (loading) {
-                <tr>
-                  <td colspan="8" style="padding:30px; color:#888;">Loading...</td>
-                </tr>
+                <tr><td colspan="8" style="padding:30px; color:#888;">Loading...</td></tr>
               }
               @if (!loading && products.length === 0) {
-                <tr>
-                  <td colspan="8" style="padding:30px; color:#888;">No products found</td>
-                </tr>
+                <tr><td colspan="8" style="padding:30px; color:#888;">No products found</td></tr>
               }
               @for (p of products; track trackById($index, p)) {
                 <tr>
@@ -79,15 +84,12 @@ import { ProductNameValidator } from '../product-name.validator';
             </tbody>
           </table>
         </div>
-    
+
         @if (totalPages > 0) {
           <div class="pagination">
             <button (click)="goPage(filter.page - 1)" [disabled]="filter.page === 1">‹</button>
             @for (p of pageNumbers; track trackByValue($index, p)) {
-              <button
-                (click)="goPage(p)"
-                [class.active]="p === filter.page"
-              >{{ p }}</button>
+              <button (click)="goPage(p)" [class.active]="p === filter.page">{{ p }}</button>
             }
             <button (click)="goPage(filter.page + 1)" [disabled]="filter.page === totalPages">›</button>
             <span style="color:#888; font-size:13px; margin-left:6px;">Total: {{ total }}</span>
@@ -95,7 +97,7 @@ import { ProductNameValidator } from '../product-name.validator';
         }
       </div>
     </div>
-    
+
     <!-- Modal -->
     @if (showModal) {
       <div class="modal-overlay" (click)="closeModal()">
@@ -110,18 +112,12 @@ import { ProductNameValidator } from '../product-name.validator';
               <input formControlName="name" [class.invalid]="isInvalid('name')" />
               @if (isInvalid('name')) {
                 <div class="error-msg">
-                  @if (productForm.get('name')?.errors?.['required']) {
-                    <span>Required</span>
-                  }
-                  @if (productForm.get('name')?.errors?.['nameTaken']) {
-                    <span>Name already exists</span>
-                  }
+                  @if (productForm.get('name')?.errors?.['required']) { <span>Required</span> }
+                  @if (productForm.get('name')?.errors?.['nameTaken']) { <span>Name already exists</span> }
                 </div>
               }
               @if (productForm.get('name')?.pending) {
-                <div style="font-size:12px; color:#888; margin-top:3px;">
-                  Checking...
-                </div>
+                <div style="font-size:12px; color:#888; margin-top:3px;">Checking...</div>
               }
             </div>
             <div class="form-group">
@@ -132,24 +128,18 @@ import { ProductNameValidator } from '../product-name.validator';
                   <option [value]="cat">{{ cat }}</option>
                 }
               </select>
-              @if (isInvalid('category')) {
-                <div class="error-msg">Required</div>
-              }
+              @if (isInvalid('category')) { <div class="error-msg">Required</div> }
             </div>
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
               <div class="form-group">
                 <label>Price</label>
                 <input type="number" formControlName="price" [class.invalid]="isInvalid('price')" />
-                @if (isInvalid('price')) {
-                  <div class="error-msg">Required, must be > 0</div>
-                }
+                @if (isInvalid('price')) { <div class="error-msg">Required, must be > 0</div> }
               </div>
               <div class="form-group">
                 <label>Stock</label>
                 <input type="number" formControlName="stock" [class.invalid]="isInvalid('stock')" />
-                @if (isInvalid('stock')) {
-                  <div class="error-msg">Required, must be >= 0</div>
-                }
+                @if (isInvalid('stock')) { <div class="error-msg">Required, must be >= 0</div> }
               </div>
             </div>
             <div class="form-group">
@@ -161,7 +151,8 @@ import { ProductNameValidator } from '../product-name.validator';
             </div>
             <div class="modal-footer">
               <button type="button" class="btn" (click)="closeModal()">Cancel</button>
-              <button type="submit" class="btn btn-primary" [disabled]="productForm.invalid || productForm.pending || saving">
+              <button type="submit" class="btn btn-primary"
+                [disabled]="productForm.invalid || productForm.pending || saving">
                 {{ saving ? 'Saving...' : (editingProduct ? 'Update' : 'Create') }}
               </button>
             </div>
@@ -172,15 +163,19 @@ import { ProductNameValidator } from '../product-name.validator';
     `
 })
 export class ProductsListComponent implements OnInit, OnDestroy {
-  products: Product[] = [];
-  total = 0;
-  totalPages = 0;
-  loading = false;
-  saving = false;
-  showModal = false;
+
+
+
+  products:      Product[] = [];
+  total          = 0;
+  totalPages     = 0;
+  loading        = false;
+  saving         = false;
+  showModal      = false;
   editingProduct: Product | null = null;
-  productForm!: FormGroup;
-  categories: string[] = [];
+  productForm!:  FormGroup;
+  categories:    string[] = [];
+  chartOptions:  AgChartOptions = {};
 
   filter: ProductFilter = {
     search: '', category: '', status: '',
@@ -188,13 +183,13 @@ export class ProductsListComponent implements OnInit, OnDestroy {
   };
 
   private searchSubject = new Subject<string>();
-  private destroy$ = new Subject<void>();
+  private destroy$      = new Subject<void>();
 
   constructor(
-    private productService: ProductService,
-    private nameValidator: ProductNameValidator,
-    private fb: FormBuilder,
-    private cdr: ChangeDetectorRef
+    private readonly productService: ProductService,
+    private readonly nameValidator:  ProductNameValidator,
+    private readonly fb:             FormBuilder,
+    private readonly cdr:            ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -215,18 +210,52 @@ export class ProductsListComponent implements OnInit, OnDestroy {
 
   loadProducts(): void {
     this.loading = true;
-    this.productService.getProducts(this.filter).pipe(takeUntil(this.destroy$)).subscribe(result => {
-      this.products = result.data;
-      this.total = result.total;
-      this.totalPages = Math.ceil(result.total / this.filter.pageSize);
-      this.loading = false;
+    this.productService.getProducts(this.filter)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(result => {
+        this.products   = result.data;
+        this.total      = result.total;
+        this.totalPages = Math.ceil(result.total / this.filter.pageSize);
+        this.loading    = false;
+        this.updateChart();
+        this.cdr.markForCheck();
+      });
+  }
+
+  private updateChart(): void {
+    this.productService.getStats().subscribe(stats => {
+      const inactive = stats.total - stats.active;
+      // ✅ نعمل object جديد كلياً — هاد اللي بيخلي ag-charts تكتشف التغيير
+      this.chartOptions = {
+        data: [
+          { status: 'Active',   count: stats.active },
+          { status: 'Inactive', count: inactive      },
+        ],
+        series: [
+          {
+            type:        'pie',
+            angleKey:    'count',
+            calloutLabelKey: 'status',
+            fills:       ['#4fca8e', '#f76f6f'],
+            strokes:     ['#fff'],
+          },
+        ],
+      };
       this.cdr.markForCheck();
     });
   }
 
   onSearch(e: Event): void { this.searchSubject.next((e.target as HTMLInputElement).value); }
-  onCategoryChange(e: Event): void { this.filter = { ...this.filter, category: (e.target as HTMLSelectElement).value, page: 1 }; this.loadProducts(); }
-  onStatusChange(e: Event): void { this.filter = { ...this.filter, status: (e.target as HTMLSelectElement).value, page: 1 }; this.loadProducts(); }
+
+  onCategoryChange(e: Event): void {
+    this.filter = { ...this.filter, category: (e.target as HTMLSelectElement).value, page: 1 };
+    this.loadProducts();
+  }
+
+  onStatusChange(e: Event): void {
+    this.filter = { ...this.filter, status: (e.target as HTMLSelectElement).value, page: 1 };
+    this.loadProducts();
+  }
 
   sort(col: keyof Product): void {
     const dir = this.filter.sortBy === col && this.filter.sortDir === 'asc' ? 'desc' : 'asc';
@@ -247,18 +276,19 @@ export class ProductsListComponent implements OnInit, OnDestroy {
 
   get pageNumbers(): number[] {
     const pages: number[] = [];
-    for (let i = Math.max(1, this.filter.page - 2); i <= Math.min(this.totalPages, this.filter.page + 2); i++) pages.push(i);
+    for (let i = Math.max(1, this.filter.page - 2); i <= Math.min(this.totalPages, this.filter.page + 2); i++)
+      pages.push(i);
     return pages;
   }
 
   openModal(product?: Product): void {
     this.editingProduct = product || null;
     this.productForm = this.fb.group({
-      name: [product?.name || '', [Validators.required], [this.nameValidator.uniqueName(product?.id)]],
+      name:     [product?.name     || '', [Validators.required], [this.nameValidator.uniqueName(product?.id)]],
       category: [product?.category || '', Validators.required],
-      price: [product?.price || '', [Validators.required, Validators.min(0.01)]],
-      stock: [product?.stock ?? 0, [Validators.required, Validators.min(0)]],
-      status: [product?.status || 'active']
+      price:    [product?.price    || '', [Validators.required, Validators.min(0.01)]],
+      stock:    [product?.stock    ?? 0,  [Validators.required, Validators.min(0)]],
+      status:   [product?.status   || 'active']
     });
     this.showModal = true;
   }
@@ -279,7 +309,11 @@ export class ProductsListComponent implements OnInit, OnDestroy {
     this.productService.delete(p.id).subscribe(() => this.loadProducts());
   }
 
-  isInvalid(f: string): boolean { const c = this.productForm.get(f); return !!(c?.invalid && (c?.touched || c?.dirty)); }
+  isInvalid(f: string): boolean {
+    const c = this.productForm.get(f);
+    return !!(c?.invalid && (c?.touched || c?.dirty));
+  }
+
   trackById(_: number, item: Product): number { return item.id; }
   trackByValue(_: number, v: any): any { return v; }
 }
