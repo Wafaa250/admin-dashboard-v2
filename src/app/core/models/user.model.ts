@@ -3,8 +3,7 @@ export interface User {
   id: number;
   username: string;
   email: string;
-  role: 'admin';
-  token?: string;
+role: 'admin' | 'user';  token?: string;
 }
 
 export interface LoginCredentials {

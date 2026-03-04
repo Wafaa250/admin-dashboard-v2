@@ -6,10 +6,12 @@ import { User, LoginCredentials } from '../models/user.model';
 
 const MOCK_USERS: User[] = [
   { id: 1, username: 'wafaa', email: 'wafaa@gmail.com', role: 'admin', token: 'token-wafaa-123' },
+  { id: 2, username: 'user', email: 'user@gmail.com', role: 'user', token: 'token-user-123' }
 ];
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+
   private currentUserSubject = new BehaviorSubject<User | null>(this.loadUser());
   currentUser$ = this.currentUserSubject.asObservable();
 
@@ -21,6 +23,7 @@ export class AuthService {
   }
 
   login(credentials: LoginCredentials): Observable<User> {
+
     const user = MOCK_USERS.find(
       u => u.username === credentials.username && credentials.password === 'wafaa123'
     );
@@ -54,4 +57,9 @@ export class AuthService {
   get currentUser(): User | null {
     return this.currentUserSubject.value;
   }
+
+  get role(): string | null {
+    return this.currentUserSubject.value?.role ?? null;
+  }
+
 }

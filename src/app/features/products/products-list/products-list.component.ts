@@ -10,161 +10,13 @@ import { Product, ProductFilter } from '../../../core/models/product.model';
 import { ProductNameValidator } from '../product-name.validator';
 
 @Component({
-    selector: 'app-products-list',
-    imports: [CommonModule, ReactiveFormsModule, AgCharts],
-    template: `
-    <div class="page">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-        <h1 style="font-size:20px; font-weight:600;">Products</h1>
-        <button class="btn btn-primary" (click)="openModal()">Add Product</button>
-      </div>
-
-      <!-- Pie Chart -->
-      <div class="card" style="margin-bottom:16px;">
-        <h3 style="margin-bottom:12px;">Product Status</h3>
-        <div style="height:250px;">
-          <ag-charts [options]="chartOptions" style="display:block; width:100%; height:100%;"></ag-charts>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="toolbar">
-          <input type="text" placeholder="Search..." (input)="onSearch($event)" />
-          <select (change)="onCategoryChange($event)">
-            <option value="">All Categories</option>
-            @for (cat of categories; track trackByValue($index, cat)) {
-              <option [value]="cat">{{ cat }}</option>
-            }
-          </select>
-          <select (change)="onStatusChange($event)">
-            <option value="">All Status</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-          </select>
-        </div>
-
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th (click)="sort('id')"># {{ sortIcon('id') }}</th>
-                <th (click)="sort('name')">Name {{ sortIcon('name') }}</th>
-                <th (click)="sort('category')">Category {{ sortIcon('category') }}</th>
-                <th (click)="sort('price')">Price {{ sortIcon('price') }}</th>
-                <th (click)="sort('stock')">Stock {{ sortIcon('stock') }}</th>
-                <th>Status</th>
-                <th (click)="sort('createdAt')">Created {{ sortIcon('createdAt') }}</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              @if (loading) {
-                <tr><td colspan="8" style="padding:30px; color:#888;">Loading...</td></tr>
-              }
-              @if (!loading && products.length === 0) {
-                <tr><td colspan="8" style="padding:30px; color:#888;">No products found</td></tr>
-              }
-              @for (p of products; track trackById($index, p)) {
-                <tr>
-                  <td>{{ p.id }}</td>
-                  <td>{{ p.name }}</td>
-                  <td>{{ p.category }}</td>
-                  <td>{{ p.price | currency }}</td>
-                  <td>{{ p.stock }}</td>
-                  <td>
-                    <span [class]="'status status-' + p.status">{{ p.status }}</span>
-                  </td>
-                  <td>{{ p.createdAt }}</td>
-                  <td>
-                    <button class="btn btn-sm" style="margin-right:4px;" (click)="openModal(p)">Edit</button>
-                    <button class="btn btn-danger btn-sm" (click)="delete(p)">Delete</button>
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-
-        @if (totalPages > 0) {
-          <div class="pagination">
-            <button (click)="goPage(filter.page - 1)" [disabled]="filter.page === 1">‹</button>
-            @for (p of pageNumbers; track trackByValue($index, p)) {
-              <button (click)="goPage(p)" [class.active]="p === filter.page">{{ p }}</button>
-            }
-            <button (click)="goPage(filter.page + 1)" [disabled]="filter.page === totalPages">›</button>
-            <span style="color:#888; font-size:13px; margin-left:6px;">Total: {{ total }}</span>
-          </div>
-        }
-      </div>
-    </div>
-
-    <!-- Modal -->
-    @if (showModal) {
-      <div class="modal-overlay" (click)="closeModal()">
-        <div class="modal" (click)="$event.stopPropagation()">
-          <div class="modal-header">
-            <h3>{{ editingProduct ? 'Edit Product' : 'Add Product' }}</h3>
-            <button (click)="closeModal()">×</button>
-          </div>
-          <form [formGroup]="productForm" (ngSubmit)="saveProduct()">
-            <div class="form-group">
-              <label>Name</label>
-              <input formControlName="name" [class.invalid]="isInvalid('name')" />
-              @if (isInvalid('name')) {
-                <div class="error-msg">
-                  @if (productForm.get('name')?.errors?.['required']) { <span>Required</span> }
-                  @if (productForm.get('name')?.errors?.['nameTaken']) { <span>Name already exists</span> }
-                </div>
-              }
-              @if (productForm.get('name')?.pending) {
-                <div style="font-size:12px; color:#888; margin-top:3px;">Checking...</div>
-              }
-            </div>
-            <div class="form-group">
-              <label>Category</label>
-              <select formControlName="category" [class.invalid]="isInvalid('category')">
-                <option value="">Select</option>
-                @for (cat of categories; track trackByValue($index, cat)) {
-                  <option [value]="cat">{{ cat }}</option>
-                }
-              </select>
-              @if (isInvalid('category')) { <div class="error-msg">Required</div> }
-            </div>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-              <div class="form-group">
-                <label>Price</label>
-                <input type="number" formControlName="price" [class.invalid]="isInvalid('price')" />
-                @if (isInvalid('price')) { <div class="error-msg">Required, must be > 0</div> }
-              </div>
-              <div class="form-group">
-                <label>Stock</label>
-                <input type="number" formControlName="stock" [class.invalid]="isInvalid('stock')" />
-                @if (isInvalid('stock')) { <div class="error-msg">Required, must be >= 0</div> }
-              </div>
-            </div>
-            <div class="form-group">
-              <label>Status</label>
-              <select formControlName="status">
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-              </select>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn" (click)="closeModal()">Cancel</button>
-              <button type="submit" class="btn btn-primary"
-                [disabled]="productForm.invalid || productForm.pending || saving">
-                {{ saving ? 'Saving...' : (editingProduct ? 'Update' : 'Create') }}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    }
-    `
+  selector: 'app-products-list',
+  imports: [CommonModule, ReactiveFormsModule, AgCharts],
+  templateUrl: './products-list.component.html',
+  styleUrl: './products-list.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProductsListComponent implements OnInit, OnDestroy {
-
-
 
   products:      Product[] = [];
   total          = 0;
@@ -224,22 +76,18 @@ export class ProductsListComponent implements OnInit, OnDestroy {
 
   private updateChart(): void {
     this.productService.getStats().subscribe(stats => {
-      const inactive = stats.total - stats.active;
-      // ✅ نعمل object جديد كلياً — هاد اللي بيخلي ag-charts تكتشف التغيير
       this.chartOptions = {
         data: [
           { status: 'Active',   count: stats.active },
-          { status: 'Inactive', count: inactive      },
+          { status: 'Inactive', count: stats.total - stats.active }
         ],
-        series: [
-          {
-            type:        'pie',
-            angleKey:    'count',
-            calloutLabelKey: 'status',
-            fills:       ['#4fca8e', '#f76f6f'],
-            strokes:     ['#fff'],
-          },
-        ],
+        series: [{
+          type: 'pie',
+          angleKey: 'count',
+          calloutLabelKey: 'status',
+          fills: ['#4fca8e', '#f76f6f'],
+          strokes: ['#fff']
+        }]
       };
       this.cdr.markForCheck();
     });
