@@ -33,7 +33,6 @@ export class AuthService {
     }
 
     return of(user).pipe(
-      delay(800),
       tap(u => {
         localStorage.setItem('currentUser', JSON.stringify(u));
         this.currentUserSubject.next(u);
